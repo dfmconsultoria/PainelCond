@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel de resultados da gestão — modelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Literata:opsz,wght@7..72,500;7..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F4; --surface:#FFFFFF; --ink:#12303B; --muted:#5B7480; --line:#D5DEE3; --accent:#1B6B87;
+  --good:#1F7A4D; --good-bg:#DDF0E5; --warn:#8A5A00; --warn-bg:#FBEBC8; --bad:#A5322B; --bad-bg:#F8DAD7;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1D24; --surface:#16272F; --ink:#E4EEF2; --muted:#93AAB5; --line:#2A3F49; --accent:#5DB6D3;
+    --good:#6FD09B; --good-bg:#17382A; --warn:#EBC26B; --warn-bg:#3A2E10; --bad:#F0948D; --bad-bg:#40201E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1D24; --surface:#16272F; --ink:#E4EEF2; --muted:#93AAB5; --line:#2A3F49; --accent:#5DB6D3;
+  --good:#6FD09B; --good-bg:#17382A; --warn:#EBC26B; --warn-bg:#3A2E10; --bad:#F0948D; --bad-bg:#40201E;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+header.top{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+h1{font:600 24px/1.2 var(--serif)}
+.sub{color:var(--muted);font-size:13px}
+.notice{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:8px 12px;font-size:13px;margin:12px 0 20px}
+
+.views{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.views button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:14px;white-space:nowrap}
+.views button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .views button[aria-pressed="true"]{color:#0F1D24}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .views button[aria-pressed="true"]{color:#0F1D24}}
+
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;margin-bottom:20px}
+.summary .big{font:600 30px/1.15 var(--serif)}
+.summary .big small{font:400 15px var(--sans);color:var(--muted);margin-left:4px}
+.summary .breakdown{color:var(--muted);font-size:14px;margin:4px 0 14px}
+.seg{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.seg i{height:10px;border-radius:2px;display:block}
+.seg-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+
+.s-good{color:var(--good)} .s-warn{color:var(--warn)} .s-bad{color:var(--bad)}
+.bg-good{background:var(--good)} .bg-warn{background:#C98A12} .bg-bad{background:var(--bad)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip.good{background:var(--good-bg);color:var(--good)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.bad{background:var(--bad-bg);color:var(--bad)}
+
+h2{font:600 18px/1.3 var(--serif);margin:28px 0 4px}
+.hint{color:var(--muted);font-size:13px;margin-bottom:12px}
+
+.matrix-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table.matrix{border-collapse:collapse;width:100%;min-width:640px}
+.matrix th,.matrix td{padding:0;text-align:center;border-bottom:1px solid var(--line)}
+.matrix tr:last-child th,.matrix tr:last-child td{border-bottom:0}
+.matrix thead th{height:116px;vertical-align:bottom;font-weight:500;font-size:12px;color:var(--muted)}
+.matrix thead th span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;padding:8px 0;white-space:nowrap}
+.matrix th.rowh{text-align:left;font-weight:500;padding:0}
+.matrix th.rowh button{width:100%;text-align:left;background:none;border:0;padding:11px 14px;cursor:pointer;font-size:14px}
+.matrix th.rowh button small{display:block;color:var(--muted);font-size:12px}
+.matrix tr.sel th.rowh{box-shadow:inset 3px 0 0 var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.cell{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:6px;font-size:13px;font-weight:700}
+.cell.good{background:var(--good-bg);color:var(--good)}
+.cell.warn{background:var(--warn-bg);color:var(--warn)}
+.cell.bad{background:var(--bad-bg);color:var(--bad)}
+.matrix td{padding:8px 2px}
+
+.ledger{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+details.ind{border-bottom:1px solid var(--line)}
+details.ind:last-child{border-bottom:0}
+details.ind summary{list-style:none;cursor:pointer;display:grid;align-items:center;gap:6px 16px;padding:14px 16px;
+  grid-template-columns:minmax(0,1fr) 112px 132px 108px 16px}
+details.ind summary::-webkit-details-marker{display:none}
+details.ind summary:hover{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.nm{font-weight:600;font-size:15px}
+.mt{color:var(--muted);font-size:12px}
+.val{font:600 24px/1.1 var(--serif);font-variant-numeric:tabular-nums}
+.val small{font:400 12px var(--sans);color:var(--muted);margin-left:2px}
+.dl{font-size:12px;font-weight:600;display:block;margin-top:2px}
+.dl.better{color:var(--good)} .dl.worse{color:var(--bad)} .dl.flat{color:var(--muted)}
+.spark{width:100%;height:36px;display:block}
+.chev{width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .15s}
+details[open] .chev{transform:rotate(-135deg)}
+.ficha{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px;padding:4px 16px 18px;font-size:14px}
+.ficha h3{font:600 12px/1.3 var(--sans);color:var(--muted);margin-bottom:2px}
+.ficha .full{grid-column:1/-1}
+.ficha p{max-width:70ch}
+.ficha .formula{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:color-mix(in srgb,var(--accent) 8%,transparent);padding:8px 10px;border-radius:6px}
+
+@media (max-width:720px){
+  .wrap{padding:16px 12px 40px}
+  h1{font-size:21px}
+  details.ind summary{grid-template-columns:minmax(0,1fr) auto 16px;grid-template-areas:"nm val chev" "st spark spark"}
+  details.ind summary .c-nm{grid-area:nm}
+  details.ind summary .c-val{grid-area:val;text-align:right}
+  details.ind summary .c-st{grid-area:st}
+  details.ind summary .c-sp{grid-area:spark}
+  details.ind summary .chev{grid-area:chev}
+  .ficha{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){.chev{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Painel de resultados da gestão</h1>
+      <p class="sub">[NOME DA SÍNDICA] · carteira de 5 condomínios · referência: set/2026 (últimos 12 meses)</p>
+    </div>
+  </header>
+  <p class="notice">Modelo para validação de layout e indicadores. Dados e nomes de condomínios são fictícios; metas são sugestões a ajustar por convenção, orçamento e contrato.</p>
+
+  <div class="views" id="views" role="group" aria-label="Escolher visão"></div>
+
+  <section class="summary" aria-live="polite" id="summary"></section>
+
+  <h2>Carteira por indicador</h2>
+  <p class="hint">Situação de cada condomínio no mês de referência. Selecione uma linha para detalhar abaixo.</p>
+  <div class="matrix-box"><table class="matrix" id="matrix"></table></div>
+
+  <h2 id="ledger-title">Indicadores</h2>
+  <p class="hint">Abra um indicador para ver definição, fórmula, fonte dos dados e ação sugerida quando fora da meta.</p>
+  <div class="ledger" id="ledger"></div>
+</div>
+
+<script>
+(function(){
+  var MONTHS=['out/25','nov','dez','jan/26','fev','mar','abr','mai','jun','jul','ago','set/26'];
+  var CONDOS=[
+    {id:'A',nome:'Ed. Aurora',un:96,story:0},
+    {id:'B',nome:'Res. Bosque da Serra',un:148,story:-1},
+    {id:'C',nome:'Ed. Central Park',un:72,story:1},
+    {id:'D',nome:'Res. Vila Verde',un:210,story:0},
+    {id:'E',nome:'Ed. Mirante',un:120,story:-1}
+  ];
+  var INDS=[
+    {id:'inad',nome:'Inadimplência (acima de 30 dias)',curto:'Inadimplência',un:'%',dec:1,dir:'lower',meta:5,warn:8,metaTxt:'até 5%',
+     base:[3.8,6.4,9.8,4.5,7.0],amp:0.8,min:0,max:30,
+     f:{mede:'Parcela da receita ordinária prevista que está em atraso há mais de 30 dias.',
+        formula:'valor em atraso > 30 dias ÷ receita ordinária prevista do período × 100',
+        fonte:'Relatório de inadimplência da administradora.',per:'Mensal.',
+        meta:'Até 5% (atenção até 8%). Ajustar ao histórico de cada condomínio.',
+        acao:'Rever régua de cobrança, composição de acordos e prazo para cobrança judicial ou protesto conforme a convenção.'}},
+    {id:'exec',nome:'Execução orçamentária',curto:'Orçamento',un:'%',dec:0,dir:'band',meta:100,warn:10,metaTxt:'95% a 105%',
+     base:[99,104,111,97,102],amp:2.2,min:70,max:140,
+     f:{mede:'Quanto da despesa orçada foi efetivamente realizada, acumulado no ano.',
+        formula:'despesa realizada acumulada ÷ despesa orçada acumulada × 100',
+        fonte:'Prestação de contas mensal × previsão orçamentária aprovada em assembleia.',per:'Mensal.',
+        meta:'Faixa de 95% a 105%. Abaixo pode indicar manutenção adiada; acima, estouro de orçamento.',
+        acao:'Identificar as 3 contas de maior desvio, separar desvio pontual de recorrente e decidir entre reforço, corte ou revisão do orçamento.'}},
+    {id:'res',nome:'Cobertura do fundo de reserva',curto:'Fundo de reserva',un:'%',dec:0,dir:'higher',meta:100,warn:80,metaTxt:'100% ou mais',
+     base:[108,86,62,95,100],amp:3,min:0,max:160,
+     f:{mede:'Saldo do fundo de reserva em relação à meta de saldo definida para o condomínio.',
+        formula:'saldo do fundo de reserva ÷ meta de saldo × 100',
+        fonte:'Extrato do fundo e meta aprovada em assembleia ou plano de obras previstas.',per:'Mensal.',
+        meta:'100% ou mais da meta. Definir a meta com base no plano de manutenção e vida útil dos sistemas.',
+        acao:'Rever alíquota do fundo, antecipar obras que dependem do saldo e submeter a recomposição à assembleia.'}},
+    {id:'cons',nome:'Consumo de água e energia (áreas comuns)',curto:'Consumo',un:'%',dec:1,dir:'lower',meta:0,warn:10,metaTxt:'sem aumento',
+     base:[-3,4,14,-6,8],amp:2.5,min:-30,max:40,
+     f:{mede:'Variação do consumo das áreas comuns em relação ao mesmo mês do ano anterior.',
+        formula:'(consumo do mês − consumo do mesmo mês do ano anterior) ÷ consumo do ano anterior × 100',
+        fonte:'Contas das concessionárias (água e energia), com leitura mensal registrada.',per:'Mensal. Acompanhar água e energia separadamente no detalhe.',
+        meta:'Sem aumento (atenção até +10%). Normalizar por número de moradores ou clima quando necessário.',
+        acao:'Investigar vazamentos, bombas, iluminação e contratos de demanda; validar medição antes de concluir.'}},
+    {id:'prev',nome:'Manutenção preventiva em dia',curto:'Preventiva',un:'%',dec:0,dir:'higher',meta:95,warn:85,metaTxt:'95% ou mais',
+     base:[97,88,72,94,90],amp:2.5,min:0,max:100,
+     f:{mede:'Tarefas do plano de manutenção executadas dentro do prazo programado.',
+        formula:'tarefas executadas no prazo ÷ tarefas programadas no período × 100',
+        fonte:'Plano de manutenção (ABNT NBR 5674) e ordens de serviço.',per:'Mensal.',
+        meta:'95% ou mais. Priorizar itens críticos de segurança na leitura.',
+        acao:'Reprogramar vencidas por criticidade, confirmar contratada e registrar causa do atraso (orçamento, fornecedor ou agenda).'}},
+    {id:'docs',nome:'Documentos e certificados vigentes',curto:'Documentos',un:'%',dec:0,dir:'higher',meta:100,warn:90,metaTxt:'100%',
+     base:[100,92,78,100,94],amp:1.8,min:0,max:100,
+     f:{mede:'Parcela dos documentos obrigatórios do condomínio que está dentro da validade.',
+        formula:'documentos vigentes ÷ documentos exigíveis × 100',
+        fonte:'Quadro de vencimentos do condomínio (ex.: AVCB, laudos de SPDA e elevadores, seguro, limpeza de reservatórios, PMOC quando aplicável).',per:'Mensal, com alerta de 90 dias antes do vencimento.',
+        meta:'100%. A lista de exigíveis depende do condomínio e do município, e deve ser validada.',
+        acao:'Emitir plano de regularização por documento, com responsável e data, e comunicar o conselho.'}},
+    {id:'sla',nome:'Chamados resolvidos no prazo',curto:'Chamados',un:'%',dec:0,dir:'higher',meta:90,warn:80,metaTxt:'90% ou mais',
+     base:[93,85,71,92,82],amp:3,min:0,max:100,
+     f:{mede:'Solicitações de moradores e ocorrências encerradas dentro do prazo combinado por tipo.',
+        formula:'chamados encerrados no prazo ÷ chamados encerrados no período × 100',
+        fonte:'Registro único de chamados (app, planilha ou sistema da administradora).',per:'Mensal. Prazos por tipo: urgente, normal e planejado.',
+        meta:'90% ou mais. Exibir também o tempo médio de resolução no detalhe.',
+        acao:'Ver tipos que mais estouram o prazo, ajustar prazos irreais e rever responsáveis ou fornecedores.'}},
+    {id:'csat',nome:'Satisfação dos condôminos',curto:'Satisfação',un:'',dec:1,dir:'higher',meta:4.2,warn:3.7,metaTxt:'4,2 ou mais (de 5)',
+     base:[4.5,4.0,3.3,4.3,3.9],amp:0.18,min:1,max:5,
+     f:{mede:'Nota média de condôminos em pesquisa curta (3 perguntas) sobre atendimento, comunicação e conservação.',
+        formula:'média das notas de 1 a 5, em média móvel de 3 meses',
+        fonte:'Formulário enviado a todas as unidades; registrar taxa de resposta.',per:'Mensal ou trimestral. Divulgar só com taxa de resposta mínima definida.',
+        meta:'4,2 ou mais (atenção até 3,7). Calibrar após as 2 primeiras rodadas.',
+        acao:'Ler comentários abertos, agrupar por tema e devolver aos moradores o que será feito.'}},
+    {id:'prest',nome:'Prestação de contas no prazo',curto:'Prest. de contas',un:'%',dec:0,dir:'higher',meta:100,warn:90,metaTxt:'100%',
+     base:[100,92,83,100,92],amp:2.5,min:0,max:100,
+     f:{mede:'Meses, entre os últimos 12, em que a prestação de contas foi disponibilizada até a data acordada.',
+        formula:'meses entregues até o dia [DIA] ÷ 12 × 100',
+        fonte:'Protocolo de envio ao conselho e aos condôminos.',per:'Mensal, janela móvel de 12 meses.',
+        meta:'100%. Definir o dia limite com a administradora e o conselho.',
+        acao:'Mapear onde o fluxo atrasa (fechamento, conferência ou publicação) e fixar calendário.'}},
+    {id:'delib',nome:'Deliberações de assembleia executadas no prazo',curto:'Deliberações',un:'%',dec:0,dir:'higher',meta:90,warn:75,metaTxt:'90% ou mais',
+     base:[92,80,60,90,78],amp:3,min:0,max:100,
+     f:{mede:'Decisões de assembleia com prazo vencido que foram efetivamente executadas.',
+        formula:'deliberações executadas ÷ deliberações com prazo vencido × 100',
+        fonte:'Atas e lista de ações com responsável e prazo.',per:'Mensal. Quórum e presença podem entrar como dado complementar.',
+        meta:'90% ou mais.',
+        acao:'Reapresentar pendências ao conselho com causa, novo prazo e responsável.'}}
+  ];
+
+  function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function round(v,d){var p=Math.pow(10,d);return Math.round(v*p)/p;}
+
+  var DATA={};
+  INDS.forEach(function(ind,ii){
+    DATA[ind.id]={};
+    CONDOS.forEach(function(c,ci){
+      var r=rng(ii*131+ci*17+7), base=ind.base[ci], s=new Array(12);
+      s[11]=base;
+      var worse=ind.dir==='higher'?-1:ind.dir==='lower'?1:(base>=100?1:-1);
+      for(var i=10;i>=0;i--){
+        var v=s[i+1]+(r()-0.5)*ind.amp+worse*ind.amp*0.18*c.story;
+        v=Math.min(ind.max,Math.max(ind.min,v));
+        s[i]=v;
+      }
+      DATA[ind.id][c.id]=s.map(function(v,i){return i===11?base:round(v,ind.dec+1);});
+    });
+    DATA[ind.id].ALL=MONTHS.map(function(_,m){
+      var sum=0;CONDOS.forEach(function(c){sum+=DATA[ind.id][c.id][m];});
+      return round(sum/CONDOS.length,ind.dec+1);
+    });
+  });
+
+  function status(ind,v){
+    if(ind.dir==='lower') return v<=ind.meta?'good':v<=ind.warn?'warn':'bad';
+    if(ind.dir==='higher') return v>=ind.meta?'good':v>=ind.warn?'warn':'bad';
+    var d=Math.abs(v-100);return d<=5?'good':d<=ind.warn?'warn':'bad';
+  }
+  var LBL={good:'Na meta',warn:'Atenção',bad:'Crítico'};
+  var SYM={good:'✓',warn:'!',bad:'✕'};
+  function fmt(ind,v){return v.toLocaleString('pt-BR',{minimumFractionDigits:ind.dec,maximumFractionDigits:ind.dec});}
+  function sign(ind,v){return (ind.id==='cons'&&v>0?'+':'')+fmt(ind,v);}
+
+  function spark(ind,s,st){
+    var W=120,H=36,pad=4,vals=s.concat([ind.meta]);
+    var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);if(mx===mn){mx+=1;mn-=1;}
+    function X(i){return pad+i*(W-2*pad)/11;}
+    function Y(v){return H-pad-(v-mn)*(H-2*pad)/(mx-mn);}
+    var pts=s.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' ');
+    var col='var(--'+(st==='warn'?'warn':st)+')';
+    return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="Tendência dos últimos 12 meses">'
+      +'<line x1="'+pad+'" x2="'+(W-pad)+'" y1="'+Y(ind.meta).toFixed(1)+'" y2="'+Y(ind.meta).toFixed(1)+'" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity=".6"/>'
+      +'<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+      +'<circle cx="'+X(11).toFixed(1)+'" cy="'+Y(s[11]).toFixed(1)+'" r="3.2" fill="'+col+'"/></svg>';
+  }
+
+  function delta(ind,s){
+    var d=round(s[11]-s[10],ind.dec+1),step=Math.pow(10,-ind.dec)/2;
+    if(Math.abs(d)<step) return '<span class="dl flat">— estável vs. mês anterior</span>';
+    var better=ind.dir==='lower'?d<0:ind.dir==='higher'?d>0:Math.abs(s[11]-100)<Math.abs(s[10]-100);
+    var u=ind.un==='%'?' p.p.':'';
+    return '<span class="dl '+(better?'better':'worse')+'">'+(d>0?'▲ ':'▼ ')+fmt(ind,Math.abs(d))+u+' ('+(better?'melhora':'piora')+')</span>';
+  }
+
+  var view='ALL';
+  function nameOf(v){return v==='ALL'?'Carteira consolidada':CONDOS.filter(function(c){return c.id===v;})[0].nome;}
+
+  function renderViews(){
+    var h='<button type="button" data-v="ALL" aria-pressed="'+(view==='ALL')+'">Carteira</button>';
+    CONDOS.forEach(function(c){h+='<button type="button" data-v="'+c.id+'" aria-pressed="'+(view===c.id)+'">'+c.nome+'</button>';});
+    document.getElementById('views').innerHTML=h;
+  }
+
+  function renderSummary(){
+    var n={good:0,warn:0,bad:0};
+    INDS.forEach(function(ind){n[status(ind,DATA[ind.id][view][11])]++;});
+    var segs='';
+    ['good','warn','bad'].forEach(function(k){for(var i=0;i<n[k];i++)segs+='<i class="bg-'+k+'" title="'+LBL[k]+'"></i>';});
+    document.getElementById('summary').innerHTML=
+      '<p class="sub" style="margin-bottom:4px">'+nameOf(view)+(view==='ALL'?' · média dos 5 condomínios':' · '+CONDOS.filter(function(c){return c.id===view;})[0].un+' unidades')+'</p>'
+      +'<p class="big">'+n.good+' de 10 indicadores na meta</p>'
+      +'<p class="breakdown">'+n.warn+' em atenção · '+n.bad+' críticos</p>'
+      +'<div class="seg" aria-hidden="true">'+segs+'</div>'
+      +'<div class="seg-legend"><span class="s-good">✓ Na meta</span><span class="s-warn">! Atenção</span><span class="s-bad">✕ Crítico</span></div>';
+  }
+
+  function renderMatrix(){
+    var h='<thead><tr><th scope="col" style="text-align:left;padding:0 14px 8px;vertical-align:bottom;font-size:12px;color:var(--muted);font-weight:500">Condomínio</th>';
+    INDS.forEach(function(ind){h+='<th scope="col"><span>'+ind.curto+'</span></th>';});
+    h+='</tr></thead><tbody>';
+    var rows=[{id:'ALL',nome:'Carteira (média)',sub:'5 condomínios'}].concat(CONDOS.map(function(c){return {id:c.id,nome:c.nome,sub:c.un+' unidades'};}));
+    rows.forEach(function(r){
+      h+='<tr class="'+(view===r.id?'sel':'')+'"><th scope="row" class="rowh"><button type="button" data-v="'+r.id+'">'+r.nome+'<small>'+r.sub+'</small></button></th>';
+      INDS.forEach(function(ind){
+        var st=status(ind,DATA[ind.id][r.id][11]);
+        h+='<td><span class="cell '+st+'" title="'+ind.nome+': '+LBL[st]+'">'+SYM[st]+'<span style="position:absolute;left:-9999px">'+LBL[st]+'</span></span></td>';
+      });
+      h+='</tr>';
+    });
+    document.getElementById('matrix').innerHTML=h+'</tbody>';
+  }
+
+  function renderLedger(){
+    document.getElementById('ledger-title').textContent='Indicadores · '+nameOf(view);
+    var openIds={};
+    document.querySelectorAll('#ledger details[open]').forEach(function(d){openIds[d.dataset.id]=1;});
+    var h='';
+    INDS.forEach(function(ind){
+      var s=DATA[ind.id][view],v=s[11],st=status(ind,v);
+      var extra='';
+      if(view==='ALL'){
+        var ok=CONDOS.filter(function(c){return status(ind,DATA[ind.id][c.id][11])==='good';}).length;
+        extra=' · '+ok+' de 5 na meta';
+      }
+      var unit=ind.un==='%'?'<small>%</small>':ind.id==='csat'?'<small>/ 5</small>':'';
+      h+='<details class="ind" data-id="'+ind.id+'"'+(openIds[ind.id]?' open':'')+'><summary>'
+        +'<div class="c-nm"><div class="nm">'+ind.nome+'</div><div class="mt">Meta: '+ind.metaTxt+extra+'</div></div>'
+        +'<div class="c-val"><div class="val">'+sign(ind,v)+unit+'</div>'+delta(ind,s)+'</div>'
+        +'<div class="c-sp">'+spark(ind,s,st)+'<div class="mt" style="text-align:center">'+MONTHS[0]+' a '+MONTHS[11]+'</div></div>'
+        +'<div class="c-st"><span class="chip '+st+'">'+SYM[st]+' '+LBL[st]+'</span></div>'
+        +'<i class="chev" aria-hidden="true"></i></summary>'
+        +'<div class="ficha">'
+        +'<div class="full"><h3>O que mede</h3><p>'+ind.f.mede+'</p></div>'
+        +'<div class="full"><h3>Fórmula</h3><p class="formula">'+ind.f.formula+'</p></div>'
+        +'<div><h3>Fonte dos dados</h3><p>'+ind.f.fonte+'</p></div>'
+        +'<div><h3>Periodicidade</h3><p>'+ind.f.per+'</p></div>'
+        +'<div><h3>Meta sugerida</h3><p>'+ind.f.meta+'</p></div>'
+        +'<div><h3>Se estiver fora da meta</h3><p>'+ind.f.acao+'</p></div>'
+        +'</div></details>';
+    });
+    document.getElementById('ledger').innerHTML=h;
+  }
+
+  function renderAll(){renderViews();renderSummary();renderMatrix();renderLedger();}
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-v]');
+    if(!b)return;
+    view=b.getAttribute('data-v');renderAll();
+  });
+  renderAll();
+})();
+</script>
+</body>
+</html>
